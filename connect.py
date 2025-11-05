@@ -47,54 +47,54 @@
 #     main()
 
 
-from ollama import chat
-from ollama import ChatResponse
+import requests 
 import json
-import requests
+
+ollama_url = "http://127.0.0.1/api/chat"
 
 model = "gemma3:1b"
 
 logfile = []
 
-user_input = input("YOU: ")
+def send_message(user_input):
 
-input = user_input.strip()
-
-model_output = (f"Gemma: ")
-
-ollama_url = "http://127.0.0.1:11434"
-
-def chat(user_input):
-
-    response: ChatResponse = chat(model=model, messages = [
-        {
-            'role': 'user',
-            'content': user_input
-        }
-    ])
-
-    logfile.append(response.message.content)
-
-    payload = {
+    json_payload = {
         "model": model,
-        "prompt": user_input,
-        "stream": True
+        "messages": [{"role": "user", "content": user_input}],
+        "stream": False
     }
 
-    response = requests.posts(ollama_url, data = response)
-    
-    return response
+    send_input = requests.posts(ollama_url, data = json_payload)
+
+    send_input.raise_for_status()
+
+    response = send_input.json()
+    print(response)
+
+    message = response["message"]["content"]
+    print(message)
+
+    logfile.append(message)
+
+    return message
 
 def main():
+    print("Chatting with Ollama(type 'quit' to exit)")
 
     while True:
-        input = input
 
-        if input.lower() in ["quit"]:
+        user_input = input("YOU: ").strip()
+
+        if user_input.lower() in ["quit"]:
             print("Goodbye")
             break
-        print("Gemma: ", end = "")
-        response = response
-        print(response)
-    return response
+
+        try:
+            reply = send_message(user_input)
+            print(f"Gemma: {reply}\n")
+
+        except Exception as e:
+            print(f"Error {e}")
+
+    
     
