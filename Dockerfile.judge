@@ -6,7 +6,7 @@ RUN apt update -y && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://ollama.com/install.sh | sh
-ARG MODEL_NAME=gemma3:4b
+ARG MODEL_NAME=gemma3:1b
 
 # Add a script to pull the model
 RUN echo '#!/bin/sh\n\
