@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+RUN apt update -y && \
+    apt install -y curl && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+ENV MODEL_NAME=gemma3:1b
+
+EXPOSE 11434
+
+CMD ollama serve & \
+    sleep 10 && \
+    ollama pull $MODEL_NAME && \
+    wait
+
+
