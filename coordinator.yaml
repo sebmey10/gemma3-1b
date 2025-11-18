@@ -30,11 +30,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
-        # --- THIS IS THE FIX ---
         env:
         - name: OLLAMA_HOST
           value: "0.0.0.0"
-        # -----------------------
         resources:
           requests:
             memory: "1Gi"
@@ -49,7 +47,7 @@ metadata:
   name: promptimizer-service
 spec:
   selector:
-    app: promptimizer # FIXED: Removed "-service" suffix to match deployment label
+    app: promptimizer
   ports:
   - port: 11434
     targetPort: 11434
@@ -84,11 +82,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
-        # --- THIS IS THE FIX ---
         env:
         - name: OLLAMA_HOST
           value: "0.0.0.0"
-        # -----------------------
         resources:
           requests:
             memory: "1.5Gi"
@@ -103,7 +99,7 @@ metadata:
   name: llama-service
 spec:
   selector:
-    app: llama # FIXED: Removed "-service" suffix
+    app: llama
   ports:
   - port: 11434
     targetPort: 11434
@@ -138,11 +134,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
-        # --- THIS IS THE FIX ---
         env:
         - name: OLLAMA_HOST
           value: "0.0.0.0"
-        # -----------------------
         resources:
           requests:
             memory: "1.5Gi"
@@ -157,27 +151,27 @@ metadata:
   name: qwen-service
 spec:
   selector:
-    app: qwen # FIXED: Removed "-service" suffix
+    app: qwen
   ports:
   - port: 11434
     targetPort: 11434
   type: ClusterIP
 
 ---
-# Qwen 3 0.6B model (smallest)
+# Qwen 3 0.6B model (Smallest) --- RENAMED SECTION BELOW
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: qwensmall
+  name: qwen-small # Renamed from qwensmall
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: qwensmall
+      app: qwen-small # Renamed from qwensmall
   template:
     metadata:
       labels:
-        app: qwensmall
+        app: qwen-small # Renamed from qwensmall
     spec:
       affinity:
         nodeAffinity:
@@ -187,16 +181,14 @@ spec:
               - key: node-role.kubernetes.io/control-plane
                 operator: DoesNotExist
       containers:
-      - name: qwensmall
+      - name: qwen-small # Renamed from qwensmall
         image: sebastein/ollama-qwen_small:v1.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
-        # --- THIS IS THE FIX ---
         env:
         - name: OLLAMA_HOST
           value: "0.0.0.0"
-        # -----------------------
         resources:
           requests:
             memory: "800Mi"
@@ -208,10 +200,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: qwensmall-service
+  name: qwen-small-service # Renamed from qwensmall-service (THIS FIXES THE ERROR)
 spec:
   selector:
-    app: qwensmall # FIXED: Removed "-service" suffix
+    app: qwen-small # Renamed from qwensmall
   ports:
   - port: 11434
     targetPort: 11434
@@ -246,11 +238,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
-        # --- THIS IS THE FIX ---
         env:
         - name: OLLAMA_HOST
           value: "0.0.0.0"
-        # -----------------------
         resources:
           requests:
             memory: "1.5Gi"
@@ -265,7 +255,7 @@ metadata:
   name: judge-service
 spec:
   selector:
-    app: judge # FIXED: Removed "-service" suffix
+    app: judge
   ports:
   - port: 11434
     targetPort: 11434
@@ -297,7 +287,7 @@ spec:
       containers:
       - name: orchestrator
         image: sebastein/gorkheavy_script:v1.0
-        imagePullPolicy: Always # Changed to Always so you get your script updates
+        imagePullPolicy: Always
         stdin: true
         tty: true
         resources:
