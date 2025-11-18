@@ -1,6 +1,6 @@
 import requests
 import json
-
+import time
 # These are the sockets of each container that I'm going to deploy.
 api_endpoints = {
     "promptimizer_granite": "http://promptimizer-service:11434/api/generate",
@@ -13,8 +13,8 @@ api_endpoints = {
 # These are the models I'm using to execute the workflow
 models = {
     "promptimizer": "granite4:350m",
-    "llama": "llama3.2:1b-instruct-q4_0",
-    "qwen": "qwen2.5-coder:1.5b-instruct-q4_0",
+    "llama": "llama3.2:1b",
+    "qwen": "qwen2.5-coder:1.5b",
     "qwen_small": "qwen3:0.6b",
     "judge": "gemma3:1b"
 }
