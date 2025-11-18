@@ -6,7 +6,7 @@ api_endpoints = {
     "promptimizer_granite": "http://promptimizer-service:11434/api/generate",
     "llama": "http://llama-service:11434/api/generate",
     "qwen": "http://qwen-service:11434/api/generate",
-    "qwen_small": "http://qwensmall-service:11434/api/generate",
+    "qwen_small": "http://qwen-small-service:11434/api/generate",
     "judge": "http://judge-service:11434/api/generate",
 }
 
