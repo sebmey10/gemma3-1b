@@ -30,6 +30,11 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
+        # --- THIS IS THE FIX ---
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        # -----------------------
         resources:
           requests:
             memory: "1Gi"
@@ -44,7 +49,7 @@ metadata:
   name: promptimizer-service
 spec:
   selector:
-    app: promptimizer-service
+    app: promptimizer # FIXED: Removed "-service" suffix to match deployment label
   ports:
   - port: 11434
     targetPort: 11434
@@ -79,6 +84,11 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
+        # --- THIS IS THE FIX ---
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        # -----------------------
         resources:
           requests:
             memory: "1.5Gi"
@@ -93,7 +103,7 @@ metadata:
   name: llama-service
 spec:
   selector:
-    app: llama-service
+    app: llama # FIXED: Removed "-service" suffix
   ports:
   - port: 11434
     targetPort: 11434
@@ -128,6 +138,11 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
+        # --- THIS IS THE FIX ---
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        # -----------------------
         resources:
           requests:
             memory: "1.5Gi"
@@ -142,7 +157,7 @@ metadata:
   name: qwen-service
 spec:
   selector:
-    app: qwen-service
+    app: qwen # FIXED: Removed "-service" suffix
   ports:
   - port: 11434
     targetPort: 11434
@@ -177,6 +192,11 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
+        # --- THIS IS THE FIX ---
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        # -----------------------
         resources:
           requests:
             memory: "800Mi"
@@ -191,7 +211,7 @@ metadata:
   name: qwensmall-service
 spec:
   selector:
-    app: qwensmall-service
+    app: qwensmall # FIXED: Removed "-service" suffix
   ports:
   - port: 11434
     targetPort: 11434
@@ -226,6 +246,11 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
+        # --- THIS IS THE FIX ---
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        # -----------------------
         resources:
           requests:
             memory: "1.5Gi"
@@ -240,7 +265,7 @@ metadata:
   name: judge-service
 spec:
   selector:
-    app: judge-service
+    app: judge # FIXED: Removed "-service" suffix
   ports:
   - port: 11434
     targetPort: 11434
@@ -272,7 +297,7 @@ spec:
       containers:
       - name: orchestrator
         image: sebastein/gorkheavy_script:v1.0
-        imagePullPolicy: Never
+        imagePullPolicy: Always # Changed to Always so you get your script updates
         stdin: true
         tty: true
         resources:
