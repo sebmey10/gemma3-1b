@@ -7,7 +7,7 @@ RUN apt update -y && \
 
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-ENV MODEL_NAME=qwen2.5-coder:1.5b-instruct-q4_0
+ENV MODEL_NAME=qwen2.5-coder:1.5b
 ENV OLLAMA_HOST=0.0.0.0:11434
 
 EXPOSE 11434
