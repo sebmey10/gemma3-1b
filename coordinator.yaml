@@ -26,7 +26,7 @@ spec:
                 operator: DoesNotExist
       containers:
       - name: promptimizer
-        image: sebastein/promptimizer:v3.0
+        image: sebastein/promptimizer:v4.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
@@ -35,23 +35,26 @@ spec:
           value: "0.0.0.0"
         resources:
           requests:
-            memory: "1Gi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "300m"
           limits:
-            memory: "4Gi"
-            cpu: "1000m"
+            memory: "1.5Gi"
+            cpu: "800m"
         livenessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 20
+          initialDelaySeconds: 45
           periodSeconds: 5
+          timeoutSeconds: 3
 ---
 apiVersion: v1
 kind: Service
@@ -90,7 +93,7 @@ spec:
                 operator: DoesNotExist
       containers:
       - name: llama
-        image: sebastein/llama:v3.0
+        image: sebastein/llama:v4.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
@@ -99,23 +102,26 @@ spec:
           value: "0.0.0.0"
         resources:
           requests:
-            memory: "1.5Gi"
-            cpu: "500m"
+            memory: "1Gi"
+            cpu: "400m"
           limits:
-            memory: "4Gi"
-            cpu: "1000m"
+            memory: "2Gi"
+            cpu: "900m"
         livenessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 20
+          initialDelaySeconds: 45
           periodSeconds: 5
+          timeoutSeconds: 3
 ---
 apiVersion: v1
 kind: Service
@@ -154,7 +160,7 @@ spec:
                 operator: DoesNotExist
       containers:
       - name: qwen
-        image: sebastein/ollama-qwen:v3.0
+        image: sebastein/qwen:v4.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
@@ -163,23 +169,26 @@ spec:
           value: "0.0.0.0"
         resources:
           requests:
-            memory: "1.5Gi"
-            cpu: "500m"
+            memory: "1Gi"
+            cpu: "400m"
           limits:
-            memory: "4Gi"
-            cpu: "1000m"
+            memory: "2Gi"
+            cpu: "900m"
         livenessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 20
+          initialDelaySeconds: 45
           periodSeconds: 5
+          timeoutSeconds: 3
 ---
 apiVersion: v1
 kind: Service
@@ -218,7 +227,7 @@ spec:
                 operator: DoesNotExist
       containers:
       - name: qwen-small
-        image: sebastein/qwen_small:v3.0
+        image: sebastein/qwen_small:v4.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
@@ -227,23 +236,26 @@ spec:
           value: "0.0.0.0"
         resources:
           requests:
-            memory: "800Mi"
-            cpu: "300m"
+            memory: "512Mi"
+            cpu: "250m"
           limits:
-            memory: "4Gi"
-            cpu: "500m"
+            memory: "1.5Gi"
+            cpu: "600m"
         livenessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 20
+          initialDelaySeconds: 45
           periodSeconds: 5
+          timeoutSeconds: 3
 ---
 apiVersion: v1
 kind: Service
@@ -282,7 +294,7 @@ spec:
                 operator: DoesNotExist
       containers:
       - name: judge
-        image: sebastein/judge:v3.0
+        image: sebastein/judge:v4.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 11434
@@ -291,23 +303,26 @@ spec:
           value: "0.0.0.0"
         resources:
           requests:
-            memory: "1.5Gi"
-            cpu: "500m"
+            memory: "1Gi"
+            cpu: "400m"
           limits:
-            memory: "4Gi"
-            cpu: "1000m"
+            memory: "2Gi"
+            cpu: "900m"
         livenessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /api/tags
             port: 11434
-          initialDelaySeconds: 20
+          initialDelaySeconds: 45
           periodSeconds: 5
+          timeoutSeconds: 3
 ---
 apiVersion: v1
 kind: Service
@@ -353,22 +368,46 @@ spec:
         - -c
         - |
           echo "Waiting for services to be ready..."
-          until curl -f http://promptimizer:11434/api/tags; do echo "Waiting for promptimizer..."; sleep 2; done
-          until curl -f http://llama:11434/api/tags; do echo "Waiting for llama..."; sleep 2; done
-          until curl -f http://qwen:11434/api/tags; do echo "Waiting for qwen..."; sleep 2; done
-          until curl -f http://qwen-small:11434/api/tags; do echo "Waiting for qwen-small..."; sleep 2; done
-          until curl -f http://judge:11434/api/tags; do echo "Waiting for judge..."; sleep 2; done
-          echo "All services ready!"
+          
+          # Wait for services to respond
+          until curl -f http://promptimizer:11434/api/tags 2>/dev/null; do 
+            echo "Waiting for promptimizer..."; 
+            sleep 5; 
+          done
+          
+          until curl -f http://llama:11434/api/tags 2>/dev/null; do 
+            echo "Waiting for llama..."; 
+            sleep 5; 
+          done
+          
+          until curl -f http://qwen:11434/api/tags 2>/dev/null; do 
+            echo "Waiting for qwen..."; 
+            sleep 5; 
+          done
+          
+          until curl -f http://qwen-small:11434/api/tags 2>/dev/null; do 
+            echo "Waiting for qwen-small..."; 
+            sleep 5; 
+          done
+          
+          until curl -f http://judge:11434/api/tags 2>/dev/null; do 
+            echo "Waiting for judge..."; 
+            sleep 5; 
+          done
+          
+          echo "All services responding! Giving models 30s more to fully load..."
+          sleep 30
+          echo "Ready to start orchestrator!"
       containers:
       - name: orchestrator
-        image: sebastein/gorkheavy_script:v3.0
+        image: sebastein/gorkheavy_script:v4.0
         imagePullPolicy: Always
         stdin: true
         tty: true
         resources:
           requests:
-            memory: "256Mi"
+            memory: "128Mi"
             cpu: "100m"
           limits:
-            memory: "512Mi"
-            cpu: "300m"
+            memory: "256Mi"
+            cpu: "200m"
