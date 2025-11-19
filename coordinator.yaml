@@ -17,6 +17,13 @@ spec:
       labels:
         app: promptimizer
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -83,7 +90,15 @@ spec:
     metadata:
       labels:
         app: llama
+        ensemble: ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -150,7 +165,15 @@ spec:
     metadata:
       labels:
         app: qwen
+        ensemble: ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -217,7 +240,15 @@ spec:
     metadata:
       labels:
         app: qwen-small
+        ensemble: ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -284,7 +315,15 @@ spec:
     metadata:
       labels:
         app: judge
+        ensemble: ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -351,7 +390,15 @@ spec:
     metadata:
       labels:
         app: orchestrator
+        ensemble: ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
