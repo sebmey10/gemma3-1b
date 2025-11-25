@@ -1,5 +1,5 @@
-# AI Ensemble System for k3s
-# Deploy with: kubectl apply -f ai-ensemble.yaml
+# AI Ensemble System for k3s - Opus Asyncio Orchestrator
+# Deploy with: kubectl apply -f opus_coordinator.yaml
 
 ---
 # Promptimizer (Granite 4 350m model)
@@ -16,8 +16,15 @@ spec:
     metadata:
       labels:
         app: promptimizer
-        ensemble: ai-models
+        ensemble: opus-ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: opus-ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -25,13 +32,6 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/control-plane
                 operator: DoesNotExist
-      topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            ensemble: ai-models
       containers:
       - name: promptimizer
         image: sebastein/promptimizer:v4.0
@@ -91,8 +91,15 @@ spec:
     metadata:
       labels:
         app: llama
-        ensemble: ai-models
+        ensemble: opus-ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: opus-ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -100,13 +107,6 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/control-plane
                 operator: DoesNotExist
-      topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            ensemble: ai-models
       containers:
       - name: llama
         image: sebastein/llama:v4.0
@@ -166,8 +166,15 @@ spec:
     metadata:
       labels:
         app: qwen
-        ensemble: ai-models
+        ensemble: opus-ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: opus-ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -175,13 +182,6 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/control-plane
                 operator: DoesNotExist
-      topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            ensemble: ai-models
       containers:
       - name: qwen
         image: sebastein/qwen:v4.0
@@ -241,8 +241,15 @@ spec:
     metadata:
       labels:
         app: qwen-small
-        ensemble: ai-models
+        ensemble: opus-ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: opus-ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -250,13 +257,6 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/control-plane
                 operator: DoesNotExist
-      topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            ensemble: ai-models
       containers:
       - name: qwen-small
         image: sebastein/qwen_small:v4.0
@@ -316,8 +316,15 @@ spec:
     metadata:
       labels:
         app: judge
-        ensemble: ai-models
+        ensemble: opus-ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: opus-ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -325,13 +332,6 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/control-plane
                 operator: DoesNotExist
-      topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            ensemble: ai-models
       containers:
       - name: judge
         image: sebastein/judge:v4.0
@@ -377,22 +377,29 @@ spec:
   type: ClusterIP
 
 ---
-# Asyncio Orchestrator
+# Opus Asyncio Orchestrator
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: asyncio-orchestrator
+  name: opus-orchestrator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: asyncio-orchestrator
+      app: opus-orchestrator
   template:
     metadata:
       labels:
-        app: asyncio-orchestrator
-        ensemble: ai-models
+        app: opus-orchestrator
+        ensemble: opus-ai-system
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            ensemble: opus-ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -400,13 +407,6 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/control-plane
                 operator: DoesNotExist
-      topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            ensemble: ai-models
       restartPolicy: Always
       initContainers:
       - name: wait-for-services
@@ -445,10 +445,10 @@ spec:
           
           echo "All model services responding! Giving models 30s more to fully load..."
           sleep 30
-          echo "Ready to start asyncio orchestrator!"
+          echo "Ready to start opus asyncio orchestrator!"
       containers:
-      - name: asyncio-orchestrator
-        image: sebastein/asyncio_script:v4.0
+      - name: opus-orchestrator
+        image: sebastein/opus_asyncio:v1.0
         imagePullPolicy: Always
         stdin: true
         tty: true

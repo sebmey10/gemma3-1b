@@ -1,0 +1,15 @@
+FROM --platform=linux/amd64 python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl tini && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install aiohttp for async HTTP requests
+RUN pip install --no-cache-dir aiohttp
+
+COPY opus_asyncio.py .
+
+# Use tini for proper signal handling
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["python", "-u", "opus_asyncio.py"]
