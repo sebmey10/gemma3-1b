@@ -1,11 +1,9 @@
 import asyncio
 import aiohttp
-import json
-"""gc.collect in order to clear unwanted memory when I want to."""
 
 # These are the sockets of each container that I'm going to deploy.
 api_endpoints = {
-    "promptimizer_granite": "http://promptimizer:11434/api/generate",
+    "promptimizer": "http://promptimizer:11434/api/generate",
     "llama": "http://llama:11434/api/generate",
     "qwen": "http://qwen:11434/api/generate",
     "qwen_small": "http://qwen-small:11434/api/generate",
@@ -39,7 +37,7 @@ async def promptimizer(session, user_input):
     }
 
     try:
-        async with session.post(api_endpoints["promptimizer_granite"],json=json_promptimizer) as response:
+        async with session.post(api_endpoints["promptimizer"], json=json_promptimizer) as response:
             response.raise_for_status()
             data = await response.json()
             message = data["response"]
