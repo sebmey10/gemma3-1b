@@ -852,18 +852,24 @@ flowchart TD
 
 ### Detailed Flow with Timing
 
-**Typical Response Timeline (CPU-based inference):**
+**Response Timeline:**
 
-| Stage | Action | Time | Cumulative |
-|-------|--------|------|------------|
-| 0 | User submits query | 0ms | 0ms |
-| 1 | Orchestrator processes | 10ms | 10ms |
-| 2 | Promptimizer inference | 500-1000ms | 510-1010ms |
-| 3 | Parallel model execution | 2000-5000ms | 2510-6010ms |
-| 4 | Judge evaluation | 1000-2000ms | 3510-8010ms |
-| 5 | Return to user | 10ms | **3.5-8 seconds** |
+Response times are highly dependent on hardware capabilities. The system uses CPU-based inference, and actual timing can vary significantly based on:
+- CPU performance (cores, clock speed)
+- Available RAM and memory bandwidth
+- System load and concurrent processes
+- Network latency between nodes
 
-**Why this is fast:** Without parallelization, Stage 3 would take 6-15 seconds (3 models × 2-5s each). Async execution reduces this to the time of the slowest model.
+| Stage | Action | Notes |
+|-------|--------|-------|
+| 0 | User submits query | Entry point |
+| 1 | Orchestrator processes | Minimal overhead |
+| 2 | Promptimizer inference | Single model execution |
+| 3 | Parallel model execution | 3 models run concurrently |
+| 4 | Judge evaluation | Final answer selection |
+| 5 | Return to user | Response delivered |
+
+**Why parallelization matters:** Without async execution, Stage 3 would require sequential processing (3× longer). Async execution with `asyncio.gather()` reduces total time to the duration of the slowest model, not the sum of all three.
 
 ### Network Flow
 
@@ -1058,86 +1064,27 @@ sudo k3s kubectl get deployments
 sudo k3s kubectl get pods -o wide
 ```
 
-**Deployment typically takes 3-5 minutes:**
-1. Model pods start and pull images (1-2 min)
-2. Ollama servers start and download models (2-3 min)
-3. Orchestrator init container waits for services (1 min)
+**Deployment typically takes approximately 1.5 minutes:**
+1. Pods start and images are pulled
+2. Ollama servers start and models load
+3. Orchestrator init container waits for services
 4. All pods reach `Running` state
 
-### Step 4: Verify Services
-
-```bash
-# Check all services are created
-sudo k3s kubectl get services
-
-# Test model service endpoints
-sudo k3s kubectl run curl --image=curlimages/curl -it --rm -- \
-  curl http://promptimizer:11434/api/tags
-```
-
-### Step 5: Access the Orchestrator
-
-```bash
-# Get orchestrator pod name
-ORCH_POD=$(sudo k3s kubectl get pods -l app=opus-orchestrator -o jsonpath='{.items[0].metadata.name}')
-
-# Attach to the orchestrator
-sudo k3s kubectl attach $ORCH_POD -it
-```
-
-You should see:
-```
-You now have the pleasure of speaking with Gork,
-the world's closest attempt to AGI.
-Type 'exit' to quit.
-YOU:
-```
-
-### Quick Deploy Script
-
-Save as `deploy.sh`:
-
-```bash
-#!/bin/bash
-set -e
-
-echo "Deploying Gorkheavy-Lite AI Ensemble..."
-
-# Apply manifest
-sudo k3s kubectl apply -f script_final.yaml
-
-echo "Waiting for pods to be ready..."
-sudo k3s kubectl wait --for=condition=ready pod \
-  -l ensemble=opus-ai-system \
-  --timeout=300s
-
-echo "Deployment complete!"
-echo ""
-echo "To access the orchestrator:"
-echo "  sudo k3s kubectl attach \$(sudo k3s kubectl get pods -l app=opus-orchestrator -o jsonpath='{.items[0].metadata.name}') -it"
-```
-
-Run with: `chmod +x deploy.sh && ./deploy.sh`
 
 ---
 
 ## Usage
 
-Interact with the AI ensemble through the orchestrator CLI.
+Interact with the AI ensemble through the orchestrator pod.
 
-### Basic Usage
-
-1. **Attach to Orchestrator**
+### Accessing the Orchestrator
 
 ```bash
-# Get pod name
-ORCH_POD=$(sudo k3s kubectl get pods -l app=opus-orchestrator -o jsonpath='{.items[0].metadata.name}')
-
-# Attach to interactive session
-sudo k3s kubectl attach $ORCH_POD -it
+# Get pod name and exec into it
+sudo kubectl exec -it <pod_name> -- /bin/bash
 ```
 
-2. **Submit Queries**
+### Example Interaction
 
 ```
 YOU: What is Kubernetes?
@@ -1402,11 +1349,15 @@ sudo k3s kubectl delete pod <pod-name> --grace-period=0 --force
 
 ### Response Time Optimization
 
-**Current Architecture (CPU-based):**
-- Prompt optimization: 500-1000ms
-- Parallel inference (3 models): 2000-5000ms
-- Judge evaluation: 1000-2000ms
-- **Total: 3.5-8 seconds**
+**Current Architecture:**
+
+Response times are hardware-dependent and vary based on CPU performance, available resources, and system load. The system uses CPU-based inference without GPU acceleration.
+
+**Processing stages:**
+- Prompt optimization (single model)
+- Parallel inference (3 models concurrently)
+- Judge evaluation (single model)
+- Response delivery
 
 **Optimization Strategies:**
 
@@ -1541,21 +1492,6 @@ graph TB
     API --> Models[Model Services]
     Models --> GPU[GPU Node Pool]
 ```
-
-### Contributing
-
-Contributions welcome! Areas of focus:
-- Performance benchmarking
-- Model evaluations
-- UI/UX improvements
-- Documentation enhancements
-
-**To contribute:**
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit changes: `git commit -m "Add your feature"`
-4. Push to branch: `git push origin feature/your-feature`
-5. Open a Pull Request
 
 ---
 
