@@ -20,10 +20,6 @@ models = {
     "judge": "gemma3:1b"
 }
 
-# Note: We're using lists instead of appending to maintain conversation history
-
-conversation_memory = []
-
 
 async def promptimizer(session, user_input):
     prompt_text = f"""
@@ -51,8 +47,6 @@ Provide ONLY the optimized prompt in maximum 4 sentences. Do not add conversatio
             response.raise_for_status()
             data = await response.json()
             message = data["response"]
-            conversation_memory.append({"role": "promptimizer", "content": message})
-
             return message
     except aiohttp.ClientError as f:
         print(f"Promptimizer failed: {f}")
@@ -135,7 +129,6 @@ async def send_all_models(session, user_input):
 
 async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_answer):
     """Have the judge model select the best answer."""
-    context_memory = conversation_memory[-5:]
     judge_prompt = f"""
     User query: {user_input}
 
@@ -145,24 +138,19 @@ async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_
 
     Choose the best answer based on correctness, completeness, clarity, and usefulness.
     Return the contents of the best answer, nothing else.
-
-    To reference context of the conversation you're having, reference {context_memory}.
     """
 
-    # Limit to last 10 messages for context
     json_judge = {
         "model": models["judge"],
         "prompt": judge_prompt,
         "stream": False
     }
 
-
     try:
         async with session.post(api_endpoints["judge"], json = json_judge) as jud:
             jud.raise_for_status()
             data = await jud.json()
             response = data["response"]
-            conversation_memory.append({"role":"judge", "content": response})
             return str(response)
         
     except aiohttp.ClientError as e:
@@ -170,8 +158,6 @@ async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_
     
 
 async def main():
-    global conversation_memory
-
     print("You now have the pleasure of speaking with Gork,\n" \
     "the world's closest attempt to AGI.\n" \
     "Type 'exit' to quit.")
@@ -200,13 +186,6 @@ async def main():
                 if user_input.lower() == "exit":
                     break
 
-                # Add user input to memory so the judge has context
-                conversation_memory.append({"role": "user", "content": user_input})
-
-                # Keep memory small (rolling window of last 20 messages)
-                if len(conversation_memory) > 20:
-                    conversation_memory = conversation_memory[-20:]
-
                 qwen_small_response, qwen_response, llama_response = await send_all_models(session, user_input)
                 reply = await send_judge(session, user_input, qwen_small_response, llama_response, qwen_response)
 
@@ -216,8 +195,6 @@ async def main():
             except Exception as failed:
                 print(f"Error {failed}")
                 sys.stdout.flush()
-
-                
 
 
 if __name__ == "__main__":
