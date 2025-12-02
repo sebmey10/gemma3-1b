@@ -445,7 +445,7 @@ spec:
           echo "All model services responding!"
       containers:
       - name: final-script-orchestrator
-        image: sebastein/final_script:v6.0
+        image: sebastein/final_script:v7.0
         imagePullPolicy: Always
         stdin: true
         tty: true
@@ -454,8 +454,19 @@ spec:
             memory: "128Mi"
             cpu: "100m"
           limits:
-            memory: "256Mi"
-            cpu: "200m"
+            memory: "512Mi"
+            cpu: "300m"
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
+        # Add a liveness probe to prevent restarts
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import sys; sys.exit(0)"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3

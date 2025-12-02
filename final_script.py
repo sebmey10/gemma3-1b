@@ -1,6 +1,7 @@
 import asyncio
 import aiohttp
 import sys
+import os
 
 # These are the sockets of each container that I'm going to deploy.
 api_endpoints = {
@@ -43,7 +44,7 @@ Provide ONLY the optimized prompt in maximum 4 sentences. Do not add conversatio
     }
 
     try:
-        async with session.post(api_endpoints["promptimizer"], json=json_promptimizer) as response:
+        async with session.post(api_endpoints["promptimizer"], json=json_promptimizer, timeout=aiohttp.ClientTimeout(total=120)) as response:
             response.raise_for_status()
             data = await response.json()
             message = data["response"]
@@ -62,7 +63,7 @@ async def send_qwen_small(session, prompt):
         }
 
     try:
-        async with session.post(api_endpoints["qwen_small"], json = json_qwen_small) as qs:
+        async with session.post(api_endpoints["qwen_small"], json = json_qwen_small, timeout=aiohttp.ClientTimeout(total=120)) as qs:
             qs.raise_for_status()
             data = await qs.json()
             message = data["response"]
@@ -80,7 +81,7 @@ async def send_qwen(session, prompt):
     }
 
     try:
-        async with session.post(api_endpoints["qwen"], json = json_qwen) as q:
+        async with session.post(api_endpoints["qwen"], json = json_qwen, timeout=aiohttp.ClientTimeout(total=120)) as q:
             q.raise_for_status()
             data = await q.json()
             response = data["response"]
@@ -99,7 +100,7 @@ async def send_llama(session, prompt):
     }
 
     try:
-        async with session.post(api_endpoints["llama"], json = json_llama) as ll:
+        async with session.post(api_endpoints["llama"], json = json_llama, timeout=aiohttp.ClientTimeout(total=120)) as ll:
             ll.raise_for_status()
             data = await ll.json()
             response = data["response"]
@@ -147,7 +148,7 @@ async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_
     }
 
     try:
-        async with session.post(api_endpoints["judge"], json = json_judge) as jud:
+        async with session.post(api_endpoints["judge"], json = json_judge, timeout=aiohttp.ClientTimeout(total=120)) as jud:
             jud.raise_for_status()
             data = await jud.json()
             response = data["response"]
@@ -168,14 +169,28 @@ async def main():
 
             try:
                 print("YOU: ", end="", flush=True)
-                user_input = await asyncio.get_running_loop().run_in_executor(
-                    None, sys.stdin.readline
-                )
+                
+                # Check if stdin is available (interactive mode)
+                if sys.stdin.isatty():
+                    user_input = await asyncio.get_running_loop().run_in_executor(
+                        None, sys.stdin.readline
+                    )
+                else:
+                    # In Kubernetes without a TTY, wait for input with timeout
+                    try:
+                        user_input = await asyncio.wait_for(
+                            asyncio.get_running_loop().run_in_executor(None, sys.stdin.readline),
+                            timeout=60.0
+                        )
+                    except asyncio.TimeoutError:
+                        print("No input received. Waiting...")
+                        await asyncio.sleep(5)
+                        continue
                 
                 # Handle EOF (empty string means EOF)
                 if not user_input:
-                    print("\nNo input received (EOF). Waiting for input...")
-                    await asyncio.sleep(5)
+                    print("\nNo input received (EOF). Keeping pod alive...")
+                    await asyncio.sleep(30)
                     continue
                 
                 user_input = user_input.strip()
@@ -195,6 +210,7 @@ async def main():
             except Exception as failed:
                 print(f"Error {failed}")
                 sys.stdout.flush()
+                await asyncio.sleep(5)
 
 
 if __name__ == "__main__":
