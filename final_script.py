@@ -181,7 +181,7 @@ async def main():
                 print(f"Reply: {str(reply)}")
 
             except Exception as failed:
-                print(f"Error {failed}")
+                print(f"Error running main{failed}")
 
 
 if __name__ == "__main__":
