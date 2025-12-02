@@ -26,7 +26,7 @@ conversation_memory = []
 
 
 async def promptimizer(session, user_input):
-    promptimizer = f"""
+    prompt_text = f"""
 You are an expert Prompt Engineer and Logic Optimizer. Your goal is to rewrite {user_input}\n
 to be precise, concise, and highly actionable for an AI model.
 
@@ -42,7 +42,7 @@ Provide ONLY the optimized prompt in maximum 4 sentences. Do not add conversatio
 
     json_promptimizer = {
         "model": models["promptimizer"],
-        "prompt": promptimizer,
+        "prompt": prompt_text,
         "stream": False
     }
 
@@ -56,6 +56,7 @@ Provide ONLY the optimized prompt in maximum 4 sentences. Do not add conversatio
             return message
     except aiohttp.ClientError as f:
         print(f"Promptimizer failed: {f}")
+        return user_input
     
 
 async def send_qwen_small(session, prompt):
@@ -120,8 +121,8 @@ async def send_all_models(session, user_input):
 
     send = await asyncio.gather(
         send_qwen_small(session, optimized_prompt),
-        send_qwen(session, user_input),
-        send_llama(session, user_input),
+        send_qwen(session, optimized_prompt),
+        send_llama(session, optimized_prompt),
         return_exceptions = True
     )
 
@@ -198,6 +199,13 @@ async def main():
 
                 if user_input.lower() == "exit":
                     break
+
+                # Add user input to memory so the judge has context
+                conversation_memory.append({"role": "user", "content": user_input})
+
+                # Keep memory small (rolling window of last 20 messages)
+                if len(conversation_memory) > 20:
+                    conversation_memory = conversation_memory[-20:]
 
                 qwen_small_response, qwen_response, llama_response = await send_all_models(session, user_input)
                 reply = await send_judge(session, user_input, qwen_small_response, llama_response, qwen_response)
