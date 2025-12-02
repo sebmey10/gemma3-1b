@@ -134,9 +134,8 @@ async def send_all_models(session, user_input):
 
 
 async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_answer):
-
-    context_memory = conversation_memory[-5:]
     """Have the judge model select the best answer."""
+    context_memory = conversation_memory[-5:]
     judge_prompt = f"""
     User query: {user_input}
 
@@ -150,7 +149,7 @@ async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_
     To reference context of the conversation you're having, reference {context_memory}.
     """
 
-      # Limit to last 10 messages for context
+    # Limit to last 10 messages for context
     json_judge = {
         "model": models["judge"],
         "prompt": judge_prompt,
@@ -171,6 +170,7 @@ async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_
     
 
 async def main():
+    global conversation_memory
 
     print("You now have the pleasure of speaking with Gork,\n" \
     "the world's closest attempt to AGI.\n" \
@@ -182,7 +182,7 @@ async def main():
 
             try:
                 print("YOU: ", end="", flush=True)
-                user_input = await asyncio.get_event_loop().run_in_executor(
+                user_input = await asyncio.get_running_loop().run_in_executor(
                     None, sys.stdin.readline
                 )
                 
