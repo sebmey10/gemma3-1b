@@ -171,7 +171,8 @@ async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_
     
 
 async def main():
-
+    global conversation_memory
+    
     print("You now have the pleasure of speaking with Gork,\n" \
     "the world's closest attempt to AGI.\n" \
     "Type 'exit' to quit.")

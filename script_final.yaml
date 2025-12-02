@@ -396,7 +396,7 @@ spec:
       topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
+        whenUnsatisfiable: ScheduleAnyway
         labelSelector:
           matchLabels:
             ensemble: opus-ai-system
@@ -407,7 +407,6 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/control-plane
                 operator: DoesNotExist
-      restartPolicy: Always
       initContainers:
       - name: wait-for-services
         image: curlimages/curl:latest
@@ -452,7 +451,7 @@ spec:
         imagePullPolicy: Always
         stdin: true
         tty: true
-        command: ["python", "/app/final_script.py"]
+        command: ["python", "-u", "/app/final_script.py"]
         resources:
           requests:
             memory: "128Mi"
