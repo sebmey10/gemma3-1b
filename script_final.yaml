@@ -381,17 +381,17 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: opus-orchestrator
+  name: orchestrator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: opus-orchestrator
+      app: orchestrator
   template:
     metadata:
       labels:
-        app: opus-orchestrator
-        ensemble: opus-ai-system
+        app: orchestrator
+        ensemble: ai-system
     spec:
       topologySpreadConstraints:
       - maxSkew: 1
@@ -399,7 +399,7 @@ spec:
         whenUnsatisfiable: DoNotSchedule
         labelSelector:
           matchLabels:
-            ensemble: opus-ai-system
+            ensemble: ai-system
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
