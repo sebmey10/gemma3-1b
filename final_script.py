@@ -1,7 +1,6 @@
 import asyncio
 import aiohttp
 import sys
-import os
 import logging
 
 # Set up basic logging
@@ -56,7 +55,7 @@ Provide ONLY the optimized prompt in maximum 4 sentences. Do not add conversatio
 
     try:
         logger.info("Calling promptimizer API...")
-        async with session.post(api_endpoints["promptimizer"], json=json_promptimizer, timeout=aiohttp.ClientTimeout(total=120)) as response:
+        async with session.post(api_endpoints["promptimizer"], json=json_promptimizer) as response:
             response.raise_for_status()
             data = await response.json()
             message = data["response"]
@@ -79,7 +78,7 @@ async def send_qwen_small(session, prompt):
 
     try:
         logger.info("Calling qwen_small API...")
-        async with session.post(api_endpoints["qwen_small"], json = json_qwen_small, timeout=aiohttp.ClientTimeout(total=120)) as qs:
+        async with session.post(api_endpoints["qwen_small"], json=json_qwen_small) as qs:
             qs.raise_for_status()
             data = await qs.json()
             message = data["response"]
@@ -101,7 +100,7 @@ async def send_qwen(session, prompt):
 
     try:
         logger.info("Calling qwen API...")
-        async with session.post(api_endpoints["qwen"], json = json_qwen, timeout=aiohttp.ClientTimeout(total=120)) as q:
+        async with session.post(api_endpoints["qwen"], json=json_qwen) as q:
             q.raise_for_status()
             data = await q.json()
             response = data["response"]
@@ -124,7 +123,7 @@ async def send_llama(session, prompt):
 
     try:
         logger.info("Calling llama API...")
-        async with session.post(api_endpoints["llama"], json = json_llama, timeout=aiohttp.ClientTimeout(total=120)) as ll:
+        async with session.post(api_endpoints["llama"], json=json_llama) as ll:
             ll.raise_for_status()
             data = await ll.json()
             response = data["response"]
@@ -182,7 +181,7 @@ async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_
 
     try:
         logger.info("Calling judge API...")
-        async with session.post(api_endpoints["judge"], json = json_judge, timeout=aiohttp.ClientTimeout(total=120)) as jud:
+        async with session.post(api_endpoints["judge"], json=json_judge) as jud:
             jud.raise_for_status()
             data = await jud.json()
             response = data["response"]
@@ -205,13 +204,15 @@ async def main():
     print("Type 'exit' to quit.\n")
     sys.stdout.flush()
 
-    async with aiohttp.ClientSession() as session:
-        logger.info("HTTP session created")
+    # Create session with no timeout - models can take as long as they need
+    timeout = aiohttp.ClientTimeout(total=None, connect=None, sock_read=None, sock_connect=None)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        logger.info("HTTP session created (no timeout)")
         
         while True:
             try:
                 logger.info("Waiting for user input...")
-                user_input = await asyncio.get_event_loop().run_in_executor(
+                user_input = await asyncio.get_running_loop().run_in_executor(
                     None, lambda: input("YOU: ")
                 )
 
