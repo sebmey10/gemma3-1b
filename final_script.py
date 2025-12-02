@@ -33,19 +33,18 @@ models = {
 async def promptimizer(session, user_input):
     logger.info("STEP 1: Starting promptimizer")
     
-    prompt_text = f"""
-You are an expert Prompt Engineer and Logic Optimizer. Your goal is to rewrite {user_input}\n
-to be precise, concise, and highly actionable for an AI model.
+    prompt_text = f"""You are an expert prompt engineer. Transform the following user request into an optimal prompt that will produce the best possible response from an AI model.
 
-Follow these steps for every input:
-1. Identify the Core Intent: What is the user actually trying to achieve?
-2. Remove Fluff: Delete polite filler (e.g., "Please," "I was wondering"), vague descriptors, and redundant context.
-3. Clarify Constraints: Explicitly state the desired format, length, or style if implied.
-4. Structure: Use bullet points or step-by-step instructions if the task is complex.
+USER REQUEST: {user_input}
 
-Output Format:
-Provide ONLY the optimized prompt in maximum 4 sentences. Do not add conversational filler.
-"""
+OPTIMIZATION RULES:
+1. Preserve the original intent completely
+2. Add specificity: define scope, format, and constraints
+3. Request step-by-step reasoning for complex tasks
+4. Specify the desired output format (e.g., bullet points, code, explanation)
+5. Remove ambiguity while keeping the prompt concise
+
+OUTPUT: Return ONLY the optimized prompt with no preamble, explanation, or meta-commentary."""
 
     json_promptimizer = {
         "model": models["promptimizer"],
@@ -162,16 +161,26 @@ async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_
     """Have the judge model select the best answer."""
     logger.info("STEP 3: Starting judge evaluation")
     
-    judge_prompt = f"""
-    User query: {user_input}
+    judge_prompt = f"""You are an impartial judge evaluating three AI responses to a user query. Select the BEST response.
 
-    qwen_small answer: {qwen_small_answer}
-    LLaMA answer: {llama_answer}
-    Qwen answer: {qwen_answer}
+USER QUERY: {user_input}
 
-    Choose the best answer based on correctness, completeness, clarity, and usefulness.
-    Return the contents of the best answer, nothing else.
-    """
+=== RESPONSE A (qwen_small) ===
+{qwen_small_answer}
+
+=== RESPONSE B (llama) ===
+{llama_answer}
+
+=== RESPONSE C (qwen) ===
+{qwen_answer}
+
+EVALUATION CRITERIA (in order of importance):
+1. CORRECTNESS: Is the information accurate and factually correct?
+2. COMPLETENESS: Does it fully address the user's query?
+3. CLARITY: Is it well-structured and easy to understand?
+4. CONCISENESS: Is it appropriately detailed without unnecessary fluff?
+
+INSTRUCTIONS: Output ONLY the complete text of the best response. Do not include any labels, explanations, or commentary about your choice."""
 
     json_judge = {
         "model": models["judge"],
