@@ -33,18 +33,7 @@ models = {
 async def promptimizer(session, user_input):
     logger.info("Starting promptimizer")
     
-    prompt_text = f"""You are an expert prompt engineer. Transform the following user request into an optimal prompt that will produce the best possible response from an AI model.
-
-USER REQUEST: {user_input}
-
-OPTIMIZATION RULES:
-1. Preserve the original intent completely
-2. Add specificity: define scope, format, and constraints
-3. Request step-by-step reasoning for complex tasks
-4. Specify the desired output format (e.g., bullet points, code, explanation)
-5. Remove ambiguity while keeping the prompt concise
-
-OUTPUT: Return ONLY the optimized prompt with no preamble, explanation, or meta-commentary."""
+    prompt_text = f"""Simplify: {user_input}"""
 
     json_promptimizer = {
         "model": models["promptimizer"],
@@ -151,28 +140,21 @@ async def send_all_models(session, user_input):
             raise s
     
     logger.info("Gather worked")
-    return send[0], send[1], send[2]
+    return optimized_prompt, send[0], send[1], send[2]
 
 
-async def send_judge(session, user_input, qwen_small_answer, llama_answer, qwen_answer):
+async def send_judge(session, optimized_prompt, user_input, qwen_small_answer, llama_answer, qwen_answer):
     """Have the judge model select the best answer."""
     logger.info("STEP 3: Starting judge")
     
-    judge_prompt = f"""You are an impartial judge evaluating three AI model responses to a user query.\n
-    Select the BEST response.
+    judge_prompt = f"""Query: {optimized_prompt}
 
-USER QUERY: {user_input}
-
-Model Responses:{qwen_small_answer},{llama_answer},{qwen_answer}
-
-EVALUATION CRITERIA (in order of importance):
-1. CORRECTNESS: Is the information accurate and factually correct?
-2. COMPLETENESS: Does it fully address the user's query?
-3. CLARITY: Is it well-structured and easy to understand?
-4. CONCISENESS: Is it appropriately detailed without unnecessary fluff?
-
-INSTRUCTIONS: Output ONLY the complete text of the best response. Do not include any labels,\n
-explanations, or commentary about your choice."""
+    Answers:
+    A: {qwen_small_answer}
+    B: {llama_answer}
+    C: {qwen_answer}
+    
+    Return only the best answer's text, nothing else."""
 
     json_judge = {
         "model": models["judge"],
